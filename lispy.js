@@ -125,3 +125,70 @@ function find(list, predicate) {
 function remove_if(list, predicate) {
   return filter(list, function(e) {return !predicate(e);});
 }
+
+//The implementation might vary on the initial value: given, the first value of the list... or even pass an index to the host fn
+function reduceRight(list, initial_value, fn) {
+  if(list.next === null) return fn(initial_value, list.value);
+  return fn(reduceRight(list.next, initial_value, fn), list.value);
+}
+
+function reduceLeft(list, initial_value, fn) {
+  return reduceRight(reverse(list), initial_value, fn);
+}
+var reduce = reduceLeft;
+///
+
+function every(list, fn) {
+  return reduce(list, true, function(acc, el) {
+    return acc && fn(el);
+  });
+}
+
+function any(list, fn) {
+  return reduce(list, false, function(acc, el) {
+    return acc || fn(el);
+  });
+}
+
+function partition(list, fn) {
+  return(function recurr(group1, group2, list, fn){
+    if(fn(list.value)) {
+      group1.push(list.value);
+    } else {
+      group2.push(list.value);
+    }
+
+    if(list.next === null) return;
+
+    recurr(group1, group2, list.next, fn);
+    return [group1, group2];
+  }([], [], list, fn));
+}
+
+function groupBy(list, fn) {
+  return(function recurr(groups, list, fn){
+    result = fn(list.value);
+    (groups[result] = groups[result] || []).push(list.value);
+
+    if(list.next === null) return groups;
+
+    recurr(groups, list.next, fn);
+    return groups;
+  }({}, list, fn));
+}
+
+function memoize(fn) {
+  var cache = {};
+  return function(argument) {
+    cache[argument] = cache[argument] || fn(argument);
+    return cache[argument];
+  };
+}
+
+function partial(fn) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  return function() {
+    var args2 = Array.prototype.slice.call(arguments);
+    return fn.apply(this, args.concat(args2));
+  };
+}

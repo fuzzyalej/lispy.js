@@ -4,19 +4,14 @@
  - trees
  - arrays
  - structures
+ - lazy evaluation
 
 # Functions
- - reduce/foldLeft
- - foldRight
- - every
- - any?
- - map for multiple lists!
- - and/or receiving a list
- - thread-macro like clojure (->>)
- - partition
- - memoization
  - takeWhile
  - dropWhile
- - currying
- - partial application
- -
+
+# Improvements
+ - map for multiple lists
+ - and/or receiving a list
+ - thread-macro like clojure (->>)
+ - memoization for more than 1 argument

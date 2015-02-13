@@ -7,6 +7,7 @@
  - lazy evaluation
 
 # Functions
+ - curry
  - count
  - takeWhile
  - dropWhile

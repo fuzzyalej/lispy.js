@@ -7,6 +7,7 @@
  - lazy evaluation
 
 # Functions
+ - count
  - takeWhile
  - dropWhile
 

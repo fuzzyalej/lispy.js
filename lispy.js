@@ -1,29 +1,9 @@
-function cell(value, next) {
+function cell(value) {
   return {
     value: value,
-    next: next || null
+    next: null
   };
 }
-
-function length(list) {
-  if(list.next === null) return 1;
-  return 1 + length(list.next);
-}
-
-function first(list) {
-  if(list === null) return null;
-  return list.value;
-}
-
-function rest(list) {
-  if(list === null) return null;
-  return list.next;
-}
-
-//Maybe in this point we should define a nil() function that will return an empty cell, and reformat all the previous functions to use that, so we keep consistency and don't break on first(rest(cell(1))). nil() == cons(null) ???
-
-var car = first;
-var cdr = rest;
 
 function cons(value, list) {
   var tmp = cell(value);
@@ -37,59 +17,68 @@ function list() {
   return cons(args[0], list.apply(this, args.slice(1)));
 }
 
+function first(list) {
+  if(list === null) return null;
+  return list.value;
+}
+var car = first;
+var head = first;
+
+function rest(list) {
+  if(list === null) return null;
+  return list.next;
+}
+var cdr = rest;
+var tail = rest;
+
+function length(list) {
+  if(list === null) return 0;
+  return 1 + length(rest(list));
+}
+
 //example
 function replace_first(value, list) {
   return cons(value, rest(list));
 }
 
-function listp(input) {
-  return (typeof(input) === 'object') && input.hasOwnProperty('value') && input.hasOwnProperty('next');
-}
-
-function atomp(input) {
-  return !listp(input);
-}
-
-function nullp(input) {
-  return input === null;
-}
-
-function predicatep(input) {
-  return input === true || input === false;
-}
-
-function not(predicate) {
-  return !!!predicate;
-}
-
-function and(x, y) {
-  return x && y;
-}
-
-function or(x, y) {
-  return x && y;
+function nth(position, list) {
+  if(position > length(list) || position < 1) return null;
+  return (function recurr(we_are_at, list){
+    if(position === we_are_at) return first(list);
+    return recurr(we_are_at + 1, rest(list));
+  }(1, list));
 }
 
 function print(list) {
   if(list === null) return '';
-  return ('' + car(list) + ' ' + print(cdr(list)));
+  return ('' + first(list) + ' ' + rest(cdr(list)));
 }
 
-//Some error management would be awesome (raises)
+function listp(input) {
+  return (typeof(input) === 'object')
+          && input.hasOwnProperty('value')
+          && input.hasOwnProperty('next');
+}
+
+function atomp(input) { return !listp(input); }
+
+function nullp(input) { return input === null; }
+
+function predicatep(input) { return input === true || input === false; }
+
+function not(predicate) { return !!!predicate; }
 
 function append(list1, list2) {
   if(not(listp(list1)) && not(listp(list2))) return null;
 
-  if(list1.next === null) {
-    return cons(list1.value, list2);
-  }
-  return cons(list1.value, append(list1.next, list2));
+  if(rest(list1) === null) { return cons(list1.value, list2); }
+  return cons(first(list1), append(rest(list1), list2));
 }
 
 function reverse(list) {
   if(not(listp(list))) return null;
-  if(list.next === null) return cell(list.value);
-  return append(reverse(list.next), cell(list.value));
+  if(rest(list) === null) return cell(first(list));
+  return append(reverse(rest(list)), cell(first(list)));
 }
 
 function remove(element, list) { //TODO: I need here a 'list terminator', better than this
@@ -137,6 +126,17 @@ function reduceLeft(list, initial_value, fn) {
 }
 var reduce = reduceLeft;
 ///
+
+
+function and(x, y) {
+  //do this better
+  return x && y;
+}
+
+function or(x, y) {
+  //do this better
+  return x || y;
+}
 
 function every(list, fn) {
   return reduce(list, true, function(acc, el) {

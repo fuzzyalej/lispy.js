@@ -7,6 +7,8 @@
  - lazy evaluation
 
 # Functions
+ - equal
+ - replace-nth
  - curry
  - count
  - takeWhile
@@ -17,3 +19,5 @@
  - and/or receiving a list
  - thread-macro like clojure (->>)
  - memoization for more than 1 argument
+ - error management
+ - list terminator for cohesion, not null

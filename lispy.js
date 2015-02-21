@@ -31,6 +31,11 @@ function rest(list) {
 var cdr = rest;
 var tail = rest;
 
+function last(list) {
+  if(rest(list) === null) return first(list);
+  return last(rest(list));
+}
+
 function length(list) {
   if(list === null) return 0;
   return 1 + length(rest(list));
@@ -55,9 +60,10 @@ function print(list) {
 }
 
 function listp(input) {
+  if(input === null) return null;
   return (typeof(input) === 'object')
-          && input.hasOwnProperty('value')
-          && input.hasOwnProperty('next');
+  && input.hasOwnProperty('value')
+  && input.hasOwnProperty('next');
 }
 
 function atomp(input) { return !listp(input); }
@@ -92,9 +98,12 @@ function inc(element) {
   return parseInt(element) + 1;
 }
 
+function dec(element) {
+  return parseInt(element) - 1;
+}
+
 function map(list, fn) {
   if(not(listp(list))) return null;
-  if(list.next === null) return cell(fn(list.value));
   return cons(fn(list.value), map(list.next, fn));
 }
 
@@ -106,6 +115,10 @@ function filter(list, predicatefn) {
   return filter(list.next, predicatefn);
 }
 
+function count(value, list) {
+  return length(filter(list, function(e) { return e === value; }));
+}
+
 function find(list, predicate) {
   //TODO: a lot of room for improvement, like lazy evaluation :P
   return first(filter(list, predicate));
@@ -115,28 +128,16 @@ function remove_if(list, predicate) {
   return filter(list, function(e) {return !predicate(e);});
 }
 
-//The implementation might vary on the initial value: given, the first value of the list... or even pass an index to the host fn
+function reduce(list, initial_value, fn) {
+  if(list === null) return initial_value;
+  return reduce(rest(list), fn(initial_value, first(list)), fn);
+}
+
 function reduceRight(list, initial_value, fn) {
-  if(list.next === null) return fn(initial_value, list.value);
-  return fn(reduceRight(list.next, initial_value, fn), list.value);
+  if(list === null) return initial_value;
+  return fn(reduceRight(rest(list), initial_value, fn), first(list));
 }
-
-function reduceLeft(list, initial_value, fn) {
-  return reduceRight(reverse(list), initial_value, fn);
-}
-var reduce = reduceLeft;
-///
-
-
-function and(x, y) {
-  //do this better
-  return x && y;
-}
-
-function or(x, y) {
-  //do this better
-  return x || y;
-}
+var foldR = reduceRight;
 
 function every(list, fn) {
   return reduce(list, true, function(acc, el) {
@@ -190,5 +191,33 @@ function partial(fn) {
   return function() {
     var args2 = Array.prototype.slice.call(arguments);
     return fn.apply(this, args.concat(args2));
+  };
+}
+
+//function compose() {
+//  var fns = Array.prototype.slice(arguments);
+//  return function() {
+//    var args = Array.prototype.slice(arguments);
+//    return reduce(fns, args, function(fn) {
+//      return fn(args);
+//    });
+//  };
+//}
+
+// Thanks to Elias
+function fork(predicate, f, g) {
+  return function() {
+    if(predicate.apply(null, arguments))
+      return f.apply(null, arguments);
+    else
+      return g.apply(null, arguments);
+  };
+}
+
+// Thanks to Elias
+function serial(f, g) {
+  return function() {
+    f.apply(null, arguments);
+    g.apply(null, arguments);
   };
 }
